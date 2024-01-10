@@ -14,6 +14,7 @@
  * @author Robin McCorkell <robin@mccorkell.me.uk>
  * @author Roeland Jago Douma <roeland@famdouma.nl>
  * @author Thomas Müller <thomas.mueller@tmit.eu>
+ * @author Kate Döen <kate.doeen@nextcloud.com>
  *
  * @license AGPL-3.0
  *
@@ -32,8 +33,10 @@
  */
 namespace OC\Route;
 
+use DirectoryIterator;
 use OC\AppFramework\Routing\RouteParser;
 use OCP\AppFramework\App;
+use OCP\AppFramework\Http\Attribute\Route as RouteAttribute;
 use OCP\Diagnostics\IEventLogger;
 use OCP\IConfig;
 use OCP\IRequest;
@@ -41,6 +44,8 @@ use OCP\Route\IRouter;
 use OCP\Util;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGenerator;
@@ -150,6 +155,22 @@ class Router implements IRouter {
 			}
 		}
 		$this->eventLogger->start('route:load:' . $requestedApp, 'Loading Routes for ' . $requestedApp);
+
+		if ($requestedApp !== null) {
+			$routes = $this->getAttributeRoutes($requestedApp);
+			if (count($routes) > 0) {
+				$this->useCollection($requestedApp);
+				$this->setupRoutes($routes, $requestedApp);
+				$collection = $this->getCollection($requestedApp);
+				$this->root->addCollection($collection);
+
+				// Also add the OCS collection
+				$collection = $this->getCollection($requestedApp . '.ocs');
+				$collection->addPrefix('/ocsapp');
+				$this->root->addCollection($collection);
+			}
+		}
+
 		foreach ($routingFiles as $app => $file) {
 			if (!isset($this->loadedApps[$app])) {
 				if (!\OC_App::isAppLoaded($app)) {
@@ -173,6 +194,7 @@ class Router implements IRouter {
 		if (!isset($this->loadedApps['core'])) {
 			$this->loadedApps['core'] = true;
 			$this->useCollection('root');
+			$this->setupRoutes($this->getAttributeRoutes('core'), 'core');
 			require_once __DIR__ . '/../../../core/routes.php';
 
 			// Also add the OCS collection
@@ -417,6 +439,58 @@ class Router implements IRouter {
 			return 'cloud_federation_api.RequestHandler.receiveNotification';
 		}
 		return $routeName;
+	}
+
+	/**
+	 * @throws ReflectionException
+	 */
+	private function getAttributeRoutes(string $app): array {
+		$routes = [];
+
+		if ($app === "core") {
+			$appControllerPath = __DIR__ . "/../../../core/Controller";
+			$appNameSpace = "OC\\Core";
+		} else {
+			$appControllerPath = \OC_App::getAppPath($app) . "/lib/Controller";
+			$appNameSpace = App::buildAppNamespace($app);
+		}
+
+		if (!file_exists($appControllerPath)) {
+			return [];
+		}
+
+		$dir = new DirectoryIterator($appControllerPath);
+		foreach ($dir as $file) {
+			if (!str_ends_with($file->getPathname(), "Controller.php")) {
+				continue;
+			}
+
+			$class = new ReflectionClass($appNameSpace . "\\Controller\\" . basename($file->getPathname(), ".php"));
+
+			foreach ($class->getMethods() as $method) {
+				foreach ($method->getAttributes() as $attribute) {
+					if ($attribute->getName() !== "OCP\AppFramework\Http\Attribute\Route" &&
+						$attribute->getName() !== "OCP\AppFramework\Http\Attribute\ApiRoute" &&
+						$attribute->getName() !== "OCP\AppFramework\Http\Attribute\FrontpageRoute") {
+						continue;
+					}
+
+					/** @var RouteAttribute $route */
+					$route = $attribute->newInstance();
+
+					$serializedRoute = $route->toArray();
+					// Remove "Controller" suffix
+					$serializedRoute["name"] = substr($class->getShortName(), 0, -10) . "#" . $method->getName();
+
+					$key = $route->getType();
+
+					$routes[$key] ??= [];
+					$routes[$key][] = $serializedRoute;
+				}
+			}
+		}
+
+		return $routes;
 	}
 
 	/**
