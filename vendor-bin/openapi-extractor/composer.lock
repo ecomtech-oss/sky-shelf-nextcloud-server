@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "143725e36726d6a8e8fc092c8b44a4ee",
+    "content-hash": "465b51d04aa8f3e308e722448ce56a40",
     "packages": [
         {
             "name": "adhocore/cli",
-            "version": "v1.6.1",
+            "version": "v1.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/adhocore/php-cli.git",
-                "reference": "25b5a93e5eebcdb70e20ee33313a011ea3a4f770"
+                "reference": "34191315b0da20b9b4ecad783d91db992fa209a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/adhocore/php-cli/zipball/25b5a93e5eebcdb70e20ee33313a011ea3a4f770",
-                "reference": "25b5a93e5eebcdb70e20ee33313a011ea3a4f770",
+                "url": "https://api.github.com/repos/adhocore/php-cli/zipball/34191315b0da20b9b4ecad783d91db992fa209a4",
+                "reference": "34191315b0da20b9b4ecad783d91db992fa209a4",
                 "shasum": ""
             },
             "require": {
@@ -62,7 +62,7 @@
             ],
             "support": {
                 "issues": "https://github.com/adhocore/php-cli/issues",
-                "source": "https://github.com/adhocore/php-cli/tree/v1.6.1"
+                "source": "https://github.com/adhocore/php-cli/tree/v1.6.2"
             },
             "funding": [
                 {
@@ -74,20 +74,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-06-26T09:55:29+00:00"
+            "time": "2024-01-22T22:37:23+00:00"
         },
         {
             "name": "nextcloud/openapi-extractor",
-            "version": "dev-main",
+            "version": "dev-feat/routing/route-attribute",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nextcloud/openapi-extractor.git",
-                "reference": "3b7b6ff9659a5f15612d4749e085bbcb83509049"
+                "reference": "8733d1bbaf99f40efc2448e4214a36c1b225ed76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nextcloud/openapi-extractor/zipball/3b7b6ff9659a5f15612d4749e085bbcb83509049",
-                "reference": "3b7b6ff9659a5f15612d4749e085bbcb83509049",
+                "url": "https://api.github.com/repos/nextcloud/openapi-extractor/zipball/8733d1bbaf99f40efc2448e4214a36c1b225ed76",
+                "reference": "8733d1bbaf99f40efc2448e4214a36c1b225ed76",
                 "shasum": ""
             },
             "require": {
@@ -100,7 +100,6 @@
             "require-dev": {
                 "nextcloud/coding-standard": "^1.1"
             },
-            "default-branch": true,
             "bin": [
                 "generate-spec",
                 "merge-specs"
@@ -126,10 +125,10 @@
                 ]
             },
             "support": {
-                "source": "https://github.com/nextcloud/openapi-extractor/tree/main",
+                "source": "https://github.com/nextcloud/openapi-extractor/tree/feat/routing/route-attribute",
                 "issues": "https://github.com/nextcloud/openapi-extractor/issues"
             },
-            "time": "2024-01-18T14:53:21+00:00"
+            "time": "2024-01-30T13:49:22+00:00"
         },
         {
             "name": "nikic/php-parser",

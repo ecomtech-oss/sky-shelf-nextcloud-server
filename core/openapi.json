@@ -1925,6 +1925,7 @@
                         "description": "Types of shares to search for",
                         "schema": {
                             "type": "array",
+                            "default": [],
                             "items": {
                                 "type": "integer",
                                 "format": "int64"

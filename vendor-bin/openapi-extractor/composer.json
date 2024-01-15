@@ -11,6 +11,6 @@
         }
     },
 	"require": {
-		"nextcloud/openapi-extractor": "dev-main"
+		"nextcloud/openapi-extractor": "dev-feat/routing/route-attribute"
 	}
 }
