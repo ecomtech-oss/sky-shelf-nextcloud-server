@@ -360,6 +360,13 @@ class Router implements IRouter {
 		if ($absolute === false) {
 			$referenceType = UrlGenerator::ABSOLUTE_PATH;
 		}
+		/*
+		 * The route name has to be lowercase, for symfony to match it correctly.
+		 * This is required because smyfony allows mixed casing for controller names in the routes.
+		 * To avoid breaking all the existing route names, registering and matching will only use the lowercase names.
+		 * This is also save on the PHP side because class and method names collide regardless of the casing.
+		 */
+		$name = strtolower($name);
 		$name = $this->fixLegacyRootName($name);
 		if (str_contains($name, '.')) {
 			[$appName, $other] = explode('.', $name, 3);
