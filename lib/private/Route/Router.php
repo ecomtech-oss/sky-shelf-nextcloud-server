@@ -447,11 +447,11 @@ class Router implements IRouter {
 	private function getAttributeRoutes(string $app): array {
 		$routes = [];
 
-		if ($app === "core") {
-			$appControllerPath = __DIR__ . "/../../../core/Controller";
-			$appNameSpace = "OC\\Core";
+		if ($app === 'core') {
+			$appControllerPath = __DIR__ . '/../../../core/Controller';
+			$appNameSpace = 'OC\\Core';
 		} else {
-			$appControllerPath = \OC_App::getAppPath($app) . "/lib/Controller";
+			$appControllerPath = \OC_App::getAppPath($app) . '/lib/Controller';
 			$appNameSpace = App::buildAppNamespace($app);
 		}
 
@@ -461,17 +461,17 @@ class Router implements IRouter {
 
 		$dir = new DirectoryIterator($appControllerPath);
 		foreach ($dir as $file) {
-			if (!str_ends_with($file->getPathname(), "Controller.php")) {
+			if (!str_ends_with($file->getPathname(), 'Controller.php')) {
 				continue;
 			}
 
-			$class = new ReflectionClass($appNameSpace . "\\Controller\\" . basename($file->getPathname(), ".php"));
+			$class = new ReflectionClass($appNameSpace . '\\Controller\\' . basename($file->getPathname(), '.php'));
 
 			foreach ($class->getMethods() as $method) {
 				foreach ($method->getAttributes() as $attribute) {
-					if ($attribute->getName() !== "OCP\AppFramework\Http\Attribute\Route" &&
-						$attribute->getName() !== "OCP\AppFramework\Http\Attribute\ApiRoute" &&
-						$attribute->getName() !== "OCP\AppFramework\Http\Attribute\FrontpageRoute") {
+					if ($attribute->getName() !== 'OCP\AppFramework\Http\Attribute\Route' &&
+						$attribute->getName() !== 'OCP\AppFramework\Http\Attribute\ApiRoute' &&
+						$attribute->getName() !== 'OCP\AppFramework\Http\Attribute\FrontpageRoute') {
 						continue;
 					}
 
@@ -479,8 +479,8 @@ class Router implements IRouter {
 					$route = $attribute->newInstance();
 
 					$serializedRoute = $route->toArray();
-					// Remove "Controller" suffix
-					$serializedRoute["name"] = substr($class->getShortName(), 0, -10) . "#" . $method->getName();
+					// Remove 'Controller' suffix
+					$serializedRoute['name'] = substr($class->getShortName(), 0, -10) . '#' . $method->getName();
 
 					$key = $route->getType();
 
