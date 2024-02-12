@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @copyright Copyright (c) 2024 Kate Döen <kate.doeen@nextcloud.com>
  *
