@@ -44,6 +44,7 @@ use OCP\Route\IRouter;
 use OCP\Util;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -468,14 +469,7 @@ class Router implements IRouter {
 			$class = new ReflectionClass($appNameSpace . '\\Controller\\' . basename($file->getPathname(), '.php'));
 
 			foreach ($class->getMethods() as $method) {
-				foreach ($method->getAttributes() as $attribute) {
-					if ($attribute->getName() !== 'OCP\AppFramework\Http\Attribute\Route' &&
-						$attribute->getName() !== 'OCP\AppFramework\Http\Attribute\ApiRoute' &&
-						$attribute->getName() !== 'OCP\AppFramework\Http\Attribute\FrontpageRoute') {
-						continue;
-					}
-
-					/** @var RouteAttribute $route */
+				foreach ($method->getAttributes(RouteAttribute::class, ReflectionAttribute::IS_INSTANCEOF) as $attribute) {
 					$route = $attribute->newInstance();
 
 					$serializedRoute = $route->toArray();
