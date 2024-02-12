@@ -116,7 +116,7 @@ class Route {
 	/**
 	 * @since 29.0.0
 	 */
-	public function getVerb(): ?string {
+	public function getVerb(): string {
 		return $this->verb;
 	}
 
