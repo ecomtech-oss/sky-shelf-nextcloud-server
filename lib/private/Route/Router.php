@@ -415,29 +415,29 @@ class Router implements IRouter {
 	}
 
 	protected function fixLegacyRootName(string $routeName): string {
-		if ($routeName === 'files.viewcontroller.showFile') {
-			return 'files.View.showFile';
+		if ($routeName === 'files.viewcontroller.showfile') {
+			return 'files.view.showfile';
 		}
-		if ($routeName === 'files_sharing.sharecontroller.showShare') {
-			return 'files_sharing.Share.showShare';
+		if ($routeName === 'files_sharing.sharecontroller.showshare') {
+			return 'files_sharing.share.showshare';
 		}
-		if ($routeName === 'files_sharing.sharecontroller.showAuthenticate') {
-			return 'files_sharing.Share.showAuthenticate';
+		if ($routeName === 'files_sharing.sharecontroller.showauthenticate') {
+			return 'files_sharing.share.showauthenticate';
 		}
 		if ($routeName === 'files_sharing.sharecontroller.authenticate') {
-			return 'files_sharing.Share.authenticate';
+			return 'files_sharing.share.authenticate';
 		}
-		if ($routeName === 'files_sharing.sharecontroller.downloadShare') {
-			return 'files_sharing.Share.downloadShare';
+		if ($routeName === 'files_sharing.sharecontroller.downloadshare') {
+			return 'files_sharing.share.downloadshare';
 		}
-		if ($routeName === 'files_sharing.publicpreview.directLink') {
-			return 'files_sharing.PublicPreview.directLink';
+		if ($routeName === 'files_sharing.publicpreview.directlink') {
+			return 'files_sharing.publicpreview.directlink';
 		}
-		if ($routeName === 'cloud_federation_api.requesthandlercontroller.addShare') {
-			return 'cloud_federation_api.RequestHandler.addShare';
+		if ($routeName === 'cloud_federation_api.requesthandlercontroller.addshare') {
+			return 'cloud_federation_api.requesthandler.addshare';
 		}
-		if ($routeName === 'cloud_federation_api.requesthandlercontroller.receiveNotification') {
-			return 'cloud_federation_api.RequestHandler.receiveNotification';
+		if ($routeName === 'cloud_federation_api.requesthandlercontroller.receivenotification') {
+			return 'cloud_federation_api.requesthandler.receivenotification';
 		}
 		return $routeName;
 	}
