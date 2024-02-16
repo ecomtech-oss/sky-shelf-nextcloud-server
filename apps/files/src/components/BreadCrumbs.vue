@@ -8,12 +8,13 @@
 			v-bind="section"
 			dir="auto"
 			:to="section.to"
-			:icon-text="true"
+			:force-icon-text="true"
 			:title="titleForSection(index, section)"
 			:aria-description="ariaForSection(section)"
 			@click.native="onClick(section.to)">
 			<template v-if="index === 0" #icon>
-				<Home :size="20"/>
+				<NcIconSvgWrapper v-if="section.icon" :size="20" :svg="section.icon" />
+				<Home v-else :size="20"/>
 			</template>
 		</NcBreadcrumb>
 
@@ -42,6 +43,7 @@ export default Vue.extend({
 		Home,
 		NcBreadcrumbs,
 		NcBreadcrumb,
+		NcIconSvgWrapper,
 	},
 
 	props: {
@@ -82,6 +84,7 @@ export default Vue.extend({
 					exact: true,
 					name: this.getDirDisplayName(dir),
 					to,
+					icon: this.$navigation.active?.icon || null,
 				}
 			})
 		},
