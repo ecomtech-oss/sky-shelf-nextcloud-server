@@ -41,11 +41,11 @@ class BruteforceAttempts extends Base {
 		parent::configure();
 		$this
 			->setName('security:bruteforce:attempts')
-			->setDescription('resets bruteforce attempts for given IP address')
+			->setDescription('list bruteforce attempts for given IP address')
 			->addArgument(
 				'ipaddress',
 				InputArgument::REQUIRED,
-				'IP address for which the attempts are to be reset',
+				'IP address for which the attempts are to be listed',
 			)
 			->addArgument(
 				'action',
