@@ -45,7 +45,7 @@ class BruteforceAttempts extends Base {
 			->addArgument(
 				'ipaddress',
 				InputArgument::REQUIRED,
-				'IP address for which the attempts are to be listed',
+				'IP address for which the attempts status is to be shown',
 			)
 			->addArgument(
 				'action',
