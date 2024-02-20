@@ -41,7 +41,7 @@ class BruteforceAttempts extends Base {
 		parent::configure();
 		$this
 			->setName('security:bruteforce:attempts')
-			->setDescription('list bruteforce attempts for given IP address')
+			->setDescription('show bruteforce attempts status for a given IP address')
 			->addArgument(
 				'ipaddress',
 				InputArgument::REQUIRED,
