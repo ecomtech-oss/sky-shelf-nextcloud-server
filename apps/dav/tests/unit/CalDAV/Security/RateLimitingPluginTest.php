@@ -25,6 +25,9 @@ declare(strict_types=1);
 
 namespace OCA\DAV\Tests\unit\CalDAV\Security;
 
+use OCA\DAV\CalDAV\CalDavBackend;
+use OCP\IAppConfig;
+use Psr\Log\LoggerInterface;
 use OC\Security\RateLimiting\Exception\RateLimitExceededException;
 use OC\Security\RateLimiting\Limiter;
 use OCA\DAV\CalDAV\Security\RateLimitingPlugin;
@@ -37,7 +40,10 @@ use Test\TestCase;
 class RateLimitingPluginTest extends TestCase {
 
 	private Limiter|MockObject $limiter;
+	private CalDavBackend|MockObject $caldavBackend;
 	private IUserManager|MockObject $userManager;
+	private LoggerInterface|MockObject $logger;
+	private IAppConfig|MockObject $config;
 	private string $userId = 'user123';
 	private RateLimitingPlugin $plugin;
 
@@ -46,9 +52,15 @@ class RateLimitingPluginTest extends TestCase {
 
 		$this->limiter = $this->createMock(Limiter::class);
 		$this->userManager = $this->createMock(IUserManager::class);
+		$this->caldavBackend = $this->createMock(CalDavBackend::class);
+		$this->logger = $this->createMock(LoggerInterface::class);
+		$this->config = $this->createMock(IAppConfig::class);
 		$this->plugin = new RateLimitingPlugin(
 			$this->limiter,
 			$this->userManager,
+			$this->caldavBackend,
+			$this->logger,
+			$this->config,
 			$this->userId,
 		);
 	}
@@ -86,6 +98,10 @@ class RateLimitingPluginTest extends TestCase {
 				3600,
 				$user,
 			);
+		$this->config->expects(self::once())
+			->method('getValueInt')
+			->with('dav', 'maximum_calendars', 30)
+			->willReturn(12);
 
 		$this->plugin->beforeBind('calendars/foo/cal');
 	}
@@ -105,6 +121,34 @@ class RateLimitingPluginTest extends TestCase {
 				$user,
 			)
 			->willThrowException(new RateLimitExceededException());
+		$this->expectException(TooManyRequests::class);
+
+		$this->plugin->beforeBind('calendars/foo/cal');
+	}
+
+	public function testCalendarLimitReached(): void {
+		$user = $this->createMock(IUser::class);
+		$this->userManager->expects(self::once())
+			->method('get')
+			->with($this->userId)
+			->willReturn($user);
+		$user->method('getUID')->willReturn('user123');
+		$this->limiter->expects(self::once())
+			->method('registerUserRequest')
+			->with(
+				'caldav-create-calendar',
+				10,
+				3600,
+				$user,
+			);
+		$this->config->expects(self::once())
+			->method('getValueInt')
+			->with('dav', 'maximum_calendars', 30)
+			->willReturn(12);
+		$this->caldavBackend->expects(self::once())
+			->method('getCalendarsForUserCount')
+			->with('principals/users/user123')
+			->willReturn(12);
 		$this->expectException(TooManyRequests::class);
 
 		$this->plugin->beforeBind('calendars/foo/cal');

@@ -28,8 +28,11 @@ namespace OCA\DAV\CalDAV\Security;
 
 use OC\Security\RateLimiting\Exception\RateLimitExceededException;
 use OC\Security\RateLimiting\Limiter;
+use OCA\DAV\CalDAV\CalDavBackend;
 use OCA\DAV\Connector\Sabre\Exception\TooManyRequests;
+use OCP\IAppConfig;
 use OCP\IUserManager;
+use Psr\Log\LoggerInterface;
 use Sabre\DAV;
 use Sabre\DAV\ServerPlugin;
 use function count;
@@ -39,13 +42,22 @@ class RateLimitingPlugin extends ServerPlugin {
 
 	private Limiter $limiter;
 	private IUserManager $userManager;
+	private CalDavBackend $calDavBackend;
+	private IAppConfig $config;
+	private LoggerInterface $logger;
 	private ?string $userId;
 
 	public function __construct(Limiter $limiter,
 		IUserManager $userManager,
+		CalDavBackend $calDavBackend,
+		LoggerInterface $logger,
+		IAppConfig $config,
 		?string $userId) {
 		$this->limiter = $limiter;
 		$this->userManager = $userManager;
+		$this->calDavBackend = $calDavBackend;
+		$this->config = $config;
+		$this->logger = $logger;
 		$this->userId = $userId;
 	}
 
@@ -72,6 +84,14 @@ class RateLimitingPlugin extends ServerPlugin {
 				);
 			} catch (RateLimitExceededException $e) {
 				throw new TooManyRequests('Too many calendars created', 0, $e);
+			}
+
+			$limit = $this->config->getValueInt('dav', 'maximum_calendars', 30);
+			if ($limit !== -1 && $this->calDavBackend->getCalendarsForUserCount('principals/users/' . $user->getUID()) >= $limit) {
+				$this->logger->warning('Maximum number of calendars/subscriptions reached', [
+					'limit' => $limit,
+				]);
+				throw new TooManyRequests('Calendar limit reached', 0);
 			}
 		} else if (count($pathParts) === 4 && $pathParts[0] === 'calendars') {
 			// Path looks like calendars/username/calendarname/objecturi so a new calendar object is created
