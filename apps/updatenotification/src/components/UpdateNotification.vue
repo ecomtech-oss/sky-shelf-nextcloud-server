@@ -42,7 +42,7 @@
 
 				<template v-if="!isWebUpdaterRecommended && updaterEnabled && webUpdaterEnabled">
 					<h3 class="warning">
-						{{ t('updatenotification', 'Please note that the web updater is not recommended with more than 100 users! Please use the command line updater instead!') }}
+						{{ t('updatenotification', 'Please note that the web updater is not recommended with more than 100 accounts! Please use the command line updater instead!') }}
 					</h3>
 				</template>
 
@@ -56,7 +56,7 @@
 						class="button"
 						:class="{ hidden: !updaterEnabled }">{{ t('updatenotification', 'Download now') }}</a>
 					<span v-if="updaterEnabled && !webUpdaterEnabled">
-						{{ t('updatenotification', 'Please use the command line updater to update.') }}
+						{{ t('updatenotification', 'Web updater is disabled. Please use the command line updater or the appropriate update mechanism for your installation method (e.g. Docker pull) to update.') }}
 					</span>
 					<NcActions v-if="whatsNewData || changelogURL"
 						:force-menu="true"
@@ -85,7 +85,7 @@
 			</template>
 			<template v-else>
 				{{ t('updatenotification', 'Your version is up to date.') }}
-				<span :title="lastCheckedOnString" :aria-label="lastCheckedOnString" class="icon-info svg" />
+				<a :title="lastCheckedOnString" :aria-label="lastCheckedOnString" href="https://nextcloud.com/changelog/" class="icon-info details" target="_blank"></a>
 			</template>
 
 			<template v-if="!isDefaultUpdateServerURL">
@@ -131,8 +131,9 @@
 			<em v-html="noteDelayedStableString" />
 		</p>
 
-		<h4>{{ t('updatenotification', 'Notify members of the following groups about available updates:') }}</h4>
 		<NcSelect v-model="notifyGroups"
+			id="notify-members-settings-select-wrapper"
+			:input-label="t('updatenotification', 'Notify members of the following groups about available updates:')"
 			:options="groups"
 			:multiple="true"
 			label="displayname"
@@ -232,12 +233,12 @@ export default {
 		},
 
 		noteDelayedStableString() {
-			return t('updatenotification', 'Note that after a new release the update only shows up after the first minor release or later. We roll out new versions spread out over time to our users and sometimes skip a version when issues are found. Learn more about updates and release channels at {link}')
+			return t('updatenotification', 'Note that after a new release the update only shows up after the first minor release or later. We roll out new versions spread out over time and sometimes skip a version when issues are found. Learn more about updates and release channels at {link}')
 				.replace('{link}', '<a href="https://nextcloud.com/release-channels/">https://nextcloud.com/release-channels/</a>')
 		},
 
 		lastCheckedOnString() {
-			return t('updatenotification', 'Checked on {lastCheckedDate}', {
+			return t('updatenotification', 'Checked on {lastCheckedDate} - Open changelog', {
 				lastCheckedDate: this.lastCheckedDate,
 			})
 		},
@@ -483,9 +484,6 @@ export default {
 				}
 			}
 		}
-		h4 {
-			margin-block-end: 0.7rem;
-		}
 		.update-channel-selector {
 			display: flex;
 			align-items: center;
@@ -546,6 +544,14 @@ export default {
 	.update-menu .icon-star:hover,
 	.update-menu .icon-star:focus {
 		background-image: var(--icon-starred);
+	}
+	/* override NcSelect styling so that label can have correct width */
+	#notify-members-settings-select-wrapper {
+		width: fit-content;
+
+		.vs__dropdown-toggle {
+			min-width: 100%;
+		}
 	}
 }
 </style>

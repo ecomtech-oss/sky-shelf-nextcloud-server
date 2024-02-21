@@ -11,6 +11,7 @@
  * @author Joas Schilling <coding@schilljs.com>
  * @author John Molakvoæ <skjnldsv@protonmail.com>
  * @author Lukas Reschke <lukas@statuscode.ch>
+ * @author Maxence Lange <maxence@artificial-owl.com>
  * @author Morris Jobke <hey@morrisjobke.de>
  * @author Robin Appelman <robin@icewind.nl>
  * @author Roeland Jago Douma <roeland@famdouma.nl>
@@ -77,6 +78,7 @@ use OCA\DAV\Upload\ChunkingV2Plugin;
 use OCP\AppFramework\Http\Response;
 use OCP\Diagnostics\IEventLogger;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\FilesMetadata\IFilesMetadataManager;
 use OCP\ICacheFactory;
 use OCP\IRequest;
 use OCP\Profiler\IProfiler;
@@ -319,7 +321,8 @@ class Server {
 						$user,
 						\OC::$server->getRootFolder(),
 						\OC::$server->getShareManager(),
-						$view
+						$view,
+						\OCP\Server::get(IFilesMetadataManager::class)
 					));
 					$this->server->addPlugin(
 						new BulkUploadPlugin(
@@ -385,4 +388,5 @@ class Server {
 		}
 		return false;
 	}
+
 }

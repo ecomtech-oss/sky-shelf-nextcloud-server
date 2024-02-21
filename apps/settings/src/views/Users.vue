@@ -23,10 +23,9 @@
 <template>
 	<Fragment>
 		<NcContent app-name="settings">
-			<NcAppNavigation>
+			<NcAppNavigation :aria-label="t('settings', 'Account management')">
 				<NcAppNavigationNew button-id="new-user-button"
-					:text="t('settings','New user')"
-					button-class="icon-add"
+					:text="t('settings','New account')"
 					@click="showNewUserMenu"
 					@keyup.enter="showNewUserMenu"
 					@keyup.space="showNewUserMenu">
@@ -38,7 +37,7 @@
 				<template #list>
 					<NcAppNavigationItem id="everyone"
 						:exact="true"
-						:name="t('settings', 'Active users')"
+						:name="t('settings', 'Active accounts')"
 						:to="{ name: 'users' }">
 						<template #icon>
 							<AccountGroup :size="20" />
@@ -98,6 +97,7 @@
 								{{ t('settings', 'Create group') }}
 							</NcActionText>
 							<NcActionInput :label="t('settings', 'Group name')"
+								data-cy-settings-new-group-name
 								:label-outside="false"
 								:disabled="loadingAddGroup"
 								:value.sync="newGroupName"
@@ -117,7 +117,7 @@
 
 				<template #footer>
 					<ul class="app-navigation-entry__settings">
-						<NcAppNavigationItem :name="t('settings', 'User management settings')"
+						<NcAppNavigationItem :name="t('settings', 'Account management settings')"
 							@click="isDialogOpen = true">
 							<template #icon>
 								<Cog :size="20" />
@@ -127,7 +127,7 @@
 				</template>
 			</NcAppNavigation>
 
-			<NcAppContent>
+			<NcAppContent :page-heading="pageHeading">
 				<UserList :selected-group="selectedGroupDecoded"
 					:external-actions="externalActions" />
 			</NcAppContent>
@@ -212,6 +212,17 @@ export default {
 	},
 
 	computed: {
+		pageHeading() {
+			if (this.selectedGroupDecoded === null) {
+				return t('settings', 'Active accounts')
+			}
+			const matchHeading = {
+				admin: t('settings', 'Admins'),
+				disabled: t('settings', 'Disabled accounts'),
+			}
+			return matchHeading[this.selectedGroupDecoded] ?? t('settings', 'Account group: {group}', { group: this.selectedGroupDecoded })
+		},
+
 		showConfig() {
 			return this.$store.getters.getShowConfig
 		},

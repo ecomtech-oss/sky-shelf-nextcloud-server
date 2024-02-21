@@ -34,7 +34,7 @@ namespace OC\Core\Controller;
 use OC\Files\AppData\Factory;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\Attribute\IgnoreOpenAPI;
+use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\FileDisplayResponse;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Http\Response;
@@ -45,7 +45,7 @@ use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\Files\SimpleFS\ISimpleFolder;
 use OCP\IRequest;
 
-#[IgnoreOpenAPI]
+#[OpenAPI(scope: OpenAPI::SCOPE_IGNORE)]
 class JsController extends Controller {
 	protected IAppData $appData;
 
@@ -90,7 +90,6 @@ class JsController extends Controller {
 		$expires->setTimestamp($this->timeFactory->getTime());
 		$expires->add(new \DateInterval('PT'.$ttl.'S'));
 		$response->addHeader('Expires', $expires->format(\DateTime::RFC1123));
-		$response->addHeader('Pragma', 'cache');
 		return $response;
 	}
 

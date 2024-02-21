@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace OC\Core\Controller;
 
 use OC\Core\Db\ProfileConfigMapper;
+use OC\Profile\ProfileManager;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
@@ -37,7 +38,6 @@ use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
-use OC\Profile\ProfileManager;
 
 class ProfileApiController extends OCSController {
 	public function __construct(
@@ -64,7 +64,7 @@ class ProfileApiController extends OCSController {
 	 * @return DataResponse<Http::STATUS_OK, array<empty>, array{}>
 	 * @throws OCSBadRequestException Updating visibility is not possible
 	 * @throws OCSForbiddenException Not allowed to edit other users visibility
-	 * @throws OCSNotFoundException User not found
+	 * @throws OCSNotFoundException Account not found
 	 *
 	 * 200: Visibility updated successfully
 	 */
@@ -73,11 +73,11 @@ class ProfileApiController extends OCSController {
 		$targetUser = $this->userManager->get($targetUserId);
 
 		if (!$this->userManager->userExists($targetUserId)) {
-			throw new OCSNotFoundException('User does not exist');
+			throw new OCSNotFoundException('Account does not exist');
 		}
 
 		if ($requestingUser !== $targetUser) {
-			throw new OCSForbiddenException('Users can only edit their own visibility settings');
+			throw new OCSForbiddenException('People can only edit their own visibility settings');
 		}
 
 		// Ensure that a profile config is created in the database
@@ -85,7 +85,7 @@ class ProfileApiController extends OCSController {
 		$config = $this->configMapper->get($targetUserId);
 
 		if (!in_array($paramId, array_keys($config->getVisibilityMap()), true)) {
-			throw new OCSBadRequestException('User does not have a profile parameter with ID: ' . $paramId);
+			throw new OCSBadRequestException('Account does not have a profile parameter with ID: ' . $paramId);
 		}
 
 		$config->setVisibility($paramId, $visibility);

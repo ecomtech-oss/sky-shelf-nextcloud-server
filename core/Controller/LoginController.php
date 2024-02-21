@@ -35,6 +35,7 @@ declare(strict_types=1);
  */
 namespace OC\Core\Controller;
 
+use OC\AppFramework\Http\Request;
 use OC\Authentication\Login\Chain;
 use OC\Authentication\Login\LoginData;
 use OC\Authentication\WebAuthn\Manager as WebAuthnManager;
@@ -42,7 +43,8 @@ use OC\User\Session;
 use OC_App;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
-use OCP\AppFramework\Http\Attribute\IgnoreOpenAPI;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\OpenAPI;
 use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\RedirectResponse;
@@ -60,10 +62,10 @@ use OCP\Notification\IManager;
 use OCP\Security\Bruteforce\IThrottler;
 use OCP\Util;
 
-#[IgnoreOpenAPI]
 class LoginController extends Controller {
 	public const LOGIN_MSG_INVALIDPASSWORD = 'invalidpassword';
 	public const LOGIN_MSG_USERDISABLED = 'userdisabled';
+	public const LOGIN_MSG_CSRFCHECKFAILED = 'csrfCheckFailed';
 
 	public function __construct(
 		?string $appName,
@@ -104,8 +106,10 @@ class LoginController extends Controller {
 		$this->session->set('clearingExecutionContexts', '1');
 		$this->session->close();
 
-		if ($this->request->getServerProtocol() === 'https') {
-			// This feature is available only in secure contexts
+		if (
+			$this->request->getServerProtocol() === 'https' &&
+			!$this->request->isUserAgent([Request::USER_AGENT_CHROME, Request::USER_AGENT_ANDROID_MOBILE_CHROME])
+		) {
 			$response->addHeader('Clear-Site-Data', '"cache", "storage"');
 		}
 
@@ -122,6 +126,7 @@ class LoginController extends Controller {
 	 * @return TemplateResponse|RedirectResponse
 	 */
 	#[UseSession]
+	#[OpenAPI(scope: OpenAPI::SCOPE_IGNORE)]
 	public function showLoginForm(string $user = null, string $redirect_url = null): Http\Response {
 		if ($this->userSession->isLoggedIn()) {
 			return new RedirectResponse($this->urlGenerator->linkToDefaultPageUrl());
@@ -270,12 +275,13 @@ class LoginController extends Controller {
 	 * @return RedirectResponse
 	 */
 	#[UseSession]
+	#[OpenAPI(scope: OpenAPI::SCOPE_IGNORE)]
 	public function tryLogin(Chain $loginChain,
-							 string $user = '',
-							 string $password = '',
-							 string $redirect_url = null,
-							 string $timezone = '',
-							 string $timezone_offset = ''): RedirectResponse {
+		string $user = '',
+		string $password = '',
+		string $redirect_url = null,
+		string $timezone = '',
+		string $timezone_offset = ''): RedirectResponse {
 		if (!$this->request->passesCSRFCheck()) {
 			if ($this->userSession->isLoggedIn()) {
 				// If the user is already logged in and the CSRF check does not pass then
@@ -291,7 +297,7 @@ class LoginController extends Controller {
 				$user,
 				$user,
 				$redirect_url,
-				$this->l10n->t('Please try again')
+				self::LOGIN_MSG_CSRFCHECKFAILED
 			);
 		}
 
@@ -348,24 +354,34 @@ class LoginController extends Controller {
 	}
 
 	/**
+	 * Confirm the user password
+	 *
 	 * @NoAdminRequired
 	 * @BruteForceProtection(action=sudo)
 	 *
 	 * @license GNU AGPL version 3 or any later version
 	 *
+	 * @param string $password The password of the user
+	 *
+	 * @return DataResponse<Http::STATUS_OK, array{lastLogin: int}, array{}>|DataResponse<Http::STATUS_FORBIDDEN, array<empty>, array{}>
+	 *
+	 * 200: Password confirmation succeeded
+	 * 403: Password confirmation failed
 	 */
 	#[UseSession]
+	#[NoCSRFRequired]
 	public function confirmPassword(string $password): DataResponse {
 		$loginName = $this->userSession->getLoginName();
 		$loginResult = $this->userManager->checkPassword($loginName, $password);
 		if ($loginResult === false) {
 			$response = new DataResponse([], Http::STATUS_FORBIDDEN);
-			$response->throttle();
+			$response->throttle(['loginName' => $loginName]);
 			return $response;
 		}
 
 		$confirmTimestamp = time();
 		$this->session->set('last-password-confirm', $confirmTimestamp);
+		$this->throttler->resetDelay($this->request->getRemoteAddress(), 'sudo', ['loginName' => $loginName]);
 		return new DataResponse(['lastLogin' => $confirmTimestamp], Http::STATUS_OK);
 	}
 }

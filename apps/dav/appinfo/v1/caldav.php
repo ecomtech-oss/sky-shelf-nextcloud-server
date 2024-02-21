@@ -28,8 +28,8 @@
 // Backends
 use OC\KnownUser\KnownUserService;
 use OCA\DAV\CalDAV\CalDavBackend;
-use OCA\DAV\Connector\LegacyDAVACL;
 use OCA\DAV\CalDAV\CalendarRoot;
+use OCA\DAV\Connector\LegacyDAVACL;
 use OCA\DAV\Connector\Sabre\Auth;
 use OCA\DAV\Connector\Sabre\ExceptionLoggerPlugin;
 use OCA\DAV\Connector\Sabre\MaintenancePlugin;
@@ -69,11 +69,11 @@ $calDavBackend = new CalDavBackend(
 	$db,
 	$principalBackend,
 	$userManager,
-	\OC::$server->getGroupManager(),
 	$random,
 	$logger,
 	$dispatcher,
 	$config,
+	OC::$server->get(\OCA\DAV\CalDAV\Sharing\Backend::class),
 	true
 );
 
