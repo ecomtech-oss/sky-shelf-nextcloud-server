@@ -31,10 +31,11 @@
  */
 namespace OC\Memcache;
 
-use OCP\Profiler\IProfiler;
+use OCP\Cache\CappedMemoryCache;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IMemcache;
+use OCP\Profiler\IProfiler;
 use Psr\Log\LoggerInterface;
 
 class Factory implements ICacheFactory {
@@ -182,6 +183,10 @@ class Factory implements ICacheFactory {
 	 */
 	public function isAvailable(): bool {
 		return $this->distributedCacheClass !== self::NULL_CACHE;
+	}
+
+	public function createInMemory(int $capacity = 512): ICache {
+		return new CappedMemoryCache($capacity);
 	}
 
 	/**
